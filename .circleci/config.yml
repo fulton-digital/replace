@@ -1,0 +1,32 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: rust:1.22.1
+    environment:
+    steps:
+      - checkout
+      - restore_cache:
+          key: project-cache
+      - run: |
+          apt update
+          apt-get install -y musl-dev musl-tools
+      - run:
+          name: Stable Build
+          command: |
+            rustup default stable
+            rustup target add x86_64-unknown-linux-musl
+            rustc --version --verbose
+            cargo --version --verbose
+            cargo build --target x86_64-unknown-linux-musl --release
+      - run:
+          name: Test
+          command: rustup run stable cargo test
+      - store_artifacts:
+          path: /root/project/target/release
+      - save_cache:
+          key: project-cache
+          paths:
+            - "~/.cargo"
+            - "./target"

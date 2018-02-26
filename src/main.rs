@@ -6,6 +6,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
+use std::path::Path;
 use std::process;
 use std::str;
 
@@ -49,13 +50,19 @@ fn main() {
         println!("Reading template file: {}", filename);
     }
     let mut file = match File::open(filename) {
-        Err(reason) => panic!("Unable to open file {}", reason),
+        Err(reason) => {
+            eprintln!("Unable to open file: {}", reason.to_string());
+            process::exit(1);
+        }
         Ok(file) => file,
     };
 
     let mut contents = String::new();
     match file.read_to_string(&mut contents) {
-        Err(reason) => panic!("Unable to read file {}", reason),
+        Err(reason) => {
+            eprintln!("Unable to read file: {}", reason.to_string());
+            process::exit(1);
+        }
         Ok(_) => {}
     }
 
@@ -106,11 +113,39 @@ fn main() {
             }
 
             //Build the template
-            for substitution in substitutions {
-                contents = str::replace(contents.as_str(),
-                                        format!("{{{{{}}}}}", substitution),
-                                        values.get(substitution).unwrap());
-                println!("\n\n{}\n\n", contents);
+            for substitution in &substitutions {
+                let to_replace = format!("{{{{ {} }}}}", substitution);
+                let replacement = values.get(substitution.as_str()).unwrap();
+                contents = contents.replace(to_replace.as_str(),
+                                            replacement);
+            }
+
+            let path = match matches.value_of(OUTPUT) {
+                Some(file) => {
+                    Path::new(file)
+                }
+                None => {
+                    println!("{}", contents);
+                    process::exit(0);
+                }
+            };
+
+            let mut new_file = match File::create(&path) {
+                Err(reason) => {
+                    eprintln!("Unable to create file: {}", reason.to_string());
+                    process::exit(1);
+                }
+                Ok(file) => file,
+            };
+
+            match new_file.write_all(contents.as_bytes()) {
+                Err(reason) => {
+                    eprintln!("Unable to write to file: {}", reason.to_string());
+                    process::exit(1);
+                }
+                Ok(_) => {
+                    println!("successfully wrote to {:?}", path)
+                }
             }
         }
     }

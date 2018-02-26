@@ -1,7 +1,7 @@
 [package]
 name = "replace"
 version = "0.1.0"
-authors = ["zsiegel <zsiegel87@gmail.com>"]
+authors = ["zsiegel <zac@rw.co>"]
 
 [dependencies]
 regex = "0.2"
