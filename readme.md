@@ -1,5 +1,7 @@
 # Replace
 
+`*** this is a simple experimental tool developed and used by RW ***` 
+
 A simple templating tool designed to allow for simple find/replace on template files. This was originally conceived to aid in templating kuebrnetes config files.
 
 ## Example
