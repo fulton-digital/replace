@@ -93,7 +93,7 @@ fn main() {
 
             let mut values = HashMap::new();
             for replacement in &available_values {
-                let kv: Vec<&str> = replacement.split("=").collect();
+                let kv: Vec<&str> = replacement.splitn(2, "=").collect();
                 values.insert(kv[0], kv[1]);
             }
 
